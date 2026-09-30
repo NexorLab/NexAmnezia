@@ -1,7 +1,13 @@
 const generateBtn = document.getElementById("generateBtn");
 const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
+const newKeysBtn = document.getElementById("newKeysBtn");
+
 const configBox = document.getElementById("config");
+const clientPublicKeyBox = document.getElementById("clientPublicKey");
+
+let clientPrivateKey = "";
+let clientPublicKey = "";
 
 function getValue(id) {
     return document.getElementById(id).value.trim();
@@ -23,12 +29,39 @@ function bytesToBase64(bytes) {
 }
 
 function generateClientKeys() {
+    if (typeof nacl === "undefined") {
+        alert("Cryptographic library failed to load.");
+        return false;
+    }
+
     const keyPair = nacl.box.keyPair();
 
-    return {
-        privateKey: bytesToBase64(keyPair.secretKey),
-        publicKey: bytesToBase64(keyPair.publicKey)
-    };
+    clientPrivateKey = bytesToBase64(keyPair.secretKey);
+    clientPublicKey = bytesToBase64(keyPair.publicKey);
+
+    clientPublicKeyBox.value = clientPublicKey;
+
+    return true;
+}
+
+function isValidBase64Key(value) {
+    if (!value) {
+        return false;
+    }
+
+    try {
+        const normalized = value.trim();
+
+        if (normalized.length !== 44) {
+            return false;
+        }
+
+        const decoded = atob(normalized);
+
+        return decoded.length === 32;
+    } catch (error) {
+        return false;
+    }
 }
 
 function validateNumber(id, name, min, max) {
@@ -124,8 +157,17 @@ function validateFields() {
         return false;
     }
 
-    if (!getValue("publicKey")) {
+    const serverPublicKey = getValue("publicKey");
+
+    if (!serverPublicKey) {
         alert("Please enter the Server Public Key.");
+        return false;
+    }
+
+    if (!isValidBase64Key(serverPublicKey)) {
+        alert(
+            "Server Public Key must be a valid 32-byte Base64 WireGuard key."
+        );
         return false;
     }
 
@@ -141,6 +183,12 @@ function validateFields() {
         65535
     )) {
         return false;
+    }
+
+    if (!clientPrivateKey || !clientPublicKey) {
+        if (!generateClientKeys()) {
+            return false;
+        }
     }
 
     return true;
@@ -182,11 +230,9 @@ function generateConfig() {
     const allowedIPs = getValue("allowedIPs");
     const keepalive = getNumber("keepalive");
 
-    const keys = generateClientKeys();
-
     const lines = [
         "[Interface]",
-        `PrivateKey = ${keys.privateKey}`,
+        `PrivateKey = ${clientPrivateKey}`,
         `Address = ${address}`,
         `DNS = ${dns}`,
         `MTU = ${mtu}`,
@@ -222,6 +268,16 @@ function generateConfig() {
     configBox.value = lines.join("\n");
 }
 
+newKeysBtn.addEventListener("click", () => {
+    if (!generateClientKeys()) {
+        return;
+    }
+
+    configBox.value = "";
+
+    alert("New client keys generated.");
+});
+
 generateBtn.addEventListener("click", generateConfig);
 
 copyBtn.addEventListener("click", async () => {
@@ -254,12 +310,15 @@ downloadBtn.addEventListener("click", () => {
 
     const blob = new Blob(
         [configBox.value],
-        { type: "text/plain;charset=utf-8" }
+        {
+            type: "text/plain;charset=utf-8"
+        }
     );
 
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
+
     link.href = url;
     link.download = "nexamnezia.conf";
 
@@ -269,3 +328,5 @@ downloadBtn.addEventListener("click", () => {
 
     URL.revokeObjectURL(url);
 });
+
+generateClientKeys();
