@@ -1,7 +1,12 @@
+import { x25519 } from "https://cdn.jsdelivr.net/npm/@noble/curves@2.4.0/esm/ed25519.js";
+
 const generateBtn = document.getElementById("generateBtn");
 const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const configBox = document.getElementById("config");
+
+let clientPrivateKey = null;
+let clientPublicKey = null;
 
 function getValue(id) {
     return document.getElementById(id).value.trim();
@@ -10,6 +15,28 @@ function getValue(id) {
 function getNumber(id) {
     const value = getValue(id);
     return value === "" ? null : Number(value);
+}
+
+function bytesToBase64(bytes) {
+    let binary = "";
+
+    for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+    }
+
+    return btoa(binary);
+}
+
+function generateClientKeys() {
+    const keys = x25519.keygen();
+
+    clientPrivateKey = keys.secretKey;
+    clientPublicKey = keys.publicKey;
+
+    return {
+        privateKey: bytesToBase64(clientPrivateKey),
+        publicKey: bytesToBase64(clientPublicKey)
+    };
 }
 
 function validateNumber(id, name, min, max) {
@@ -22,6 +49,22 @@ function validateNumber(id, name, min, max) {
 
     if (!Number.isInteger(value) || value < min || value > max) {
         alert(`${name} must be an integer between ${min} and ${max}.`);
+        return false;
+    }
+
+    return true;
+}
+
+function validateServer() {
+    const server = getValue("server");
+
+    if (!server) {
+        alert("Please enter an IP address or domain.");
+        return false;
+    }
+
+    if (/\s/.test(server)) {
+        alert("IP / Domain must not contain spaces.");
         return false;
     }
 
@@ -44,35 +87,11 @@ function validatePort() {
     return true;
 }
 
-function validateServer() {
-    const server = getValue("server");
+function validateFields() {
+    if (!validateServer()) return false;
+    if (!validatePort()) return false;
 
-    if (!server) {
-        alert("Please enter an IP address or domain.");
-        return false;
-    }
-
-    // Prevent accidental whitespace in endpoint
-    if (/\s/.test(server)) {
-        alert("IP / Domain must not contain spaces.");
-        return false;
-    }
-
-    return true;
-}
-
-function validateRequiredFields() {
-    if (!validateServer()) {
-        return false;
-    }
-
-    if (!validatePort()) {
-        return false;
-    }
-
-    if (!validateNumber("mtu", "MTU", 576, 9000)) {
-        return false;
-    }
+    if (!validateNumber("mtu", "MTU", 576, 9000)) return false;
 
     if (!getValue("address")) {
         alert("Please enter a client address.");
@@ -84,33 +103,14 @@ function validateRequiredFields() {
         return false;
     }
 
-    if (!validateNumber("jc", "Jc", 0, 128)) {
-        return false;
-    }
+    if (!validateNumber("jc", "Jc", 0, 128)) return false;
+    if (!validateNumber("jmin", "Jmin", 0, 65535)) return false;
+    if (!validateNumber("jmax", "Jmax", 0, 65535)) return false;
 
-    if (!validateNumber("jmin", "Jmin", 0, 65535)) {
-        return false;
-    }
-
-    if (!validateNumber("jmax", "Jmax", 0, 65535)) {
-        return false;
-    }
-
-    if (!validateNumber("s1", "S1", 0, 65535)) {
-        return false;
-    }
-
-    if (!validateNumber("s2", "S2", 0, 65535)) {
-        return false;
-    }
-
-    if (!validateNumber("s3", "S3", 0, 65535)) {
-        return false;
-    }
-
-    if (!validateNumber("s4", "S4", 0, 65535)) {
-        return false;
-    }
+    if (!validateNumber("s1", "S1", 0, 65535)) return false;
+    if (!validateNumber("s2", "S2", 0, 65535)) return false;
+    if (!validateNumber("s3", "S3", 0, 65535)) return false;
+    if (!validateNumber("s4", "S4", 0, 65535)) return false;
 
     if (!getValue("h1")) {
         alert("Please enter H1.");
@@ -142,7 +142,12 @@ function validateRequiredFields() {
         return false;
     }
 
-    if (!validateNumber("keepalive", "Persistent Keepalive", 0, 65535)) {
+    if (!validateNumber(
+        "keepalive",
+        "Persistent Keepalive",
+        0,
+        65535
+    )) {
         return false;
     }
 
@@ -150,7 +155,7 @@ function validateRequiredFields() {
 }
 
 function generateConfig() {
-    if (!validateRequiredFields()) {
+    if (!validateFields()) {
         return;
     }
 
@@ -181,13 +186,15 @@ function generateConfig() {
     const i4 = getValue("i4");
     const i5 = getValue("i5");
 
-    const publicKey = getValue("publicKey");
+    const serverPublicKey = getValue("publicKey");
     const allowedIPs = getValue("allowedIPs");
     const keepalive = getNumber("keepalive");
 
+    const keys = generateClientKeys();
+
     const lines = [
         "[Interface]",
-        "PrivateKey = YOUR_PRIVATE_KEY",
+        `PrivateKey = ${keys.privateKey}`,
         `Address = ${address}`,
         `DNS = ${dns}`,
         `MTU = ${mtu}`,
@@ -205,7 +212,6 @@ function generateConfig() {
         `H4 = ${h4}`
     ];
 
-    // Add I1-I5 only when the user supplied them.
     if (i1) lines.push(`I1 = ${i1}`);
     if (i2) lines.push(`I2 = ${i2}`);
     if (i3) lines.push(`I3 = ${i3}`);
@@ -215,7 +221,7 @@ function generateConfig() {
     lines.push(
         "",
         "[Peer]",
-        `PublicKey = ${publicKey}`,
+        `PublicKey = ${serverPublicKey}`,
         `AllowedIPs = ${allowedIPs}`,
         `Endpoint = ${server}:${port}`,
         `PersistentKeepalive = ${keepalive}`
@@ -236,7 +242,6 @@ copyBtn.addEventListener("click", async () => {
         await navigator.clipboard.writeText(configBox.value);
         alert("Configuration copied.");
     } catch (error) {
-        // Fallback for browsers where Clipboard API is unavailable.
         configBox.focus();
         configBox.select();
 
@@ -265,6 +270,7 @@ downloadBtn.addEventListener("click", () => {
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
+
     link.href = url;
     link.download = "nexamnezia.conf";
 
