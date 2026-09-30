@@ -1,12 +1,7 @@
-import { x25519 } from "https://cdn.jsdelivr.net/npm/@noble/curves@2.4.0/ed25519.js";
-
 const generateBtn = document.getElementById("generateBtn");
 const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const configBox = document.getElementById("config");
-
-let clientPrivateKey = null;
-let clientPublicKey = null;
 
 function getValue(id) {
     return document.getElementById(id).value.trim();
@@ -20,22 +15,19 @@ function getNumber(id) {
 function bytesToBase64(bytes) {
     let binary = "";
 
-    for (const byte of bytes) {
-        binary += String.fromCharCode(byte);
+    for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
     }
 
     return btoa(binary);
 }
 
 function generateClientKeys() {
-    const keys = x25519.keygen();
-
-    clientPrivateKey = keys.secretKey;
-    clientPublicKey = keys.publicKey;
+    const keyPair = nacl.box.keyPair();
 
     return {
-        privateKey: bytesToBase64(clientPrivateKey),
-        publicKey: bytesToBase64(clientPublicKey)
+        privateKey: bytesToBase64(keyPair.secretKey),
+        publicKey: bytesToBase64(keyPair.publicKey)
     };
 }
 
@@ -262,15 +254,12 @@ downloadBtn.addEventListener("click", () => {
 
     const blob = new Blob(
         [configBox.value],
-        {
-            type: "text/plain;charset=utf-8"
-        }
+        { type: "text/plain;charset=utf-8" }
     );
 
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
-
     link.href = url;
     link.download = "nexamnezia.conf";
 
