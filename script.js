@@ -259,7 +259,7 @@ function generateConfig() {
     lines.push(
         "",
         "[Peer]",
-        `PublicKey = ${serverPublicKey}`,
+        `PublicKey = ${serverPublicKey || "YOUR_SERVER_PUBLIC_KEY"}`,
         `AllowedIPs = ${allowedIPs}`,
         `Endpoint = ${server}:${port}`,
         `PersistentKeepalive = ${keepalive}`
