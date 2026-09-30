@@ -3,66 +3,231 @@ const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const configBox = document.getElementById("config");
 
-generateBtn.addEventListener("click", generateConfig);
-
 function getValue(id) {
     return document.getElementById(id).value.trim();
 }
 
-function generateConfig() {
+function getNumber(id) {
+    const value = getValue(id);
+    return value === "" ? null : Number(value);
+}
+
+function validateNumber(id, name, min, max) {
+    const value = getNumber(id);
+
+    if (value === null) {
+        alert(`${name} is required.`);
+        return false;
+    }
+
+    if (!Number.isInteger(value) || value < min || value > max) {
+        alert(`${name} must be an integer between ${min} and ${max}.`);
+        return false;
+    }
+
+    return true;
+}
+
+function validatePort() {
+    const port = getNumber("port");
+
+    if (port === null) {
+        alert("Please enter a port.");
+        return false;
+    }
+
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        alert("Port must be between 1 and 65535.");
+        return false;
+    }
+
+    return true;
+}
+
+function validateServer() {
     const server = getValue("server");
-    const port = getValue("port");
-    const mtu = getValue("mtu");
 
-    const jc = getValue("jc");
-    const jmin = getValue("jmin");
-    const jmax = getValue("jmax");
+    if (!server) {
+        alert("Please enter an IP address or domain.");
+        return false;
+    }
 
-    const s1 = getValue("s1");
-    const s2 = getValue("s2");
+    // Prevent accidental whitespace in endpoint
+    if (/\s/.test(server)) {
+        alert("IP / Domain must not contain spaces.");
+        return false;
+    }
+
+    return true;
+}
+
+function validateRequiredFields() {
+    if (!validateServer()) {
+        return false;
+    }
+
+    if (!validatePort()) {
+        return false;
+    }
+
+    if (!validateNumber("mtu", "MTU", 576, 9000)) {
+        return false;
+    }
+
+    if (!getValue("address")) {
+        alert("Please enter a client address.");
+        return false;
+    }
+
+    if (!getValue("dns")) {
+        alert("Please enter a DNS server.");
+        return false;
+    }
+
+    if (!validateNumber("jc", "Jc", 0, 128)) {
+        return false;
+    }
+
+    if (!validateNumber("jmin", "Jmin", 0, 65535)) {
+        return false;
+    }
+
+    if (!validateNumber("jmax", "Jmax", 0, 65535)) {
+        return false;
+    }
+
+    if (!validateNumber("s1", "S1", 0, 65535)) {
+        return false;
+    }
+
+    if (!validateNumber("s2", "S2", 0, 65535)) {
+        return false;
+    }
+
+    if (!validateNumber("s3", "S3", 0, 65535)) {
+        return false;
+    }
+
+    if (!validateNumber("s4", "S4", 0, 65535)) {
+        return false;
+    }
+
+    if (!getValue("h1")) {
+        alert("Please enter H1.");
+        return false;
+    }
+
+    if (!getValue("h2")) {
+        alert("Please enter H2.");
+        return false;
+    }
+
+    if (!getValue("h3")) {
+        alert("Please enter H3.");
+        return false;
+    }
+
+    if (!getValue("h4")) {
+        alert("Please enter H4.");
+        return false;
+    }
+
+    if (!getValue("publicKey")) {
+        alert("Please enter the Server Public Key.");
+        return false;
+    }
+
+    if (!getValue("allowedIPs")) {
+        alert("Please enter Allowed IPs.");
+        return false;
+    }
+
+    if (!validateNumber("keepalive", "Persistent Keepalive", 0, 65535)) {
+        return false;
+    }
+
+    return true;
+}
+
+function generateConfig() {
+    if (!validateRequiredFields()) {
+        return;
+    }
+
+    const server = getValue("server");
+    const port = getNumber("port");
+
+    const mtu = getNumber("mtu");
+    const address = getValue("address");
+    const dns = getValue("dns");
+
+    const jc = getNumber("jc");
+    const jmin = getNumber("jmin");
+    const jmax = getNumber("jmax");
+
+    const s1 = getNumber("s1");
+    const s2 = getNumber("s2");
+    const s3 = getNumber("s3");
+    const s4 = getNumber("s4");
 
     const h1 = getValue("h1");
     const h2 = getValue("h2");
     const h3 = getValue("h3");
     const h4 = getValue("h4");
 
-    if (!server) {
-        alert("Please enter an IP address or domain.");
-        return;
-    }
+    const i1 = getValue("i1");
+    const i2 = getValue("i2");
+    const i3 = getValue("i3");
+    const i4 = getValue("i4");
+    const i5 = getValue("i5");
 
-    if (!port) {
-        alert("Please enter a port.");
-        return;
-    }
+    const publicKey = getValue("publicKey");
+    const allowedIPs = getValue("allowedIPs");
+    const keepalive = getNumber("keepalive");
 
-    const config = `[Interface]
-PrivateKey = YOUR_PRIVATE_KEY
-Address = 10.0.0.2/32
-DNS = 1.1.1.1
-MTU = ${mtu}
+    const lines = [
+        "[Interface]",
+        "PrivateKey = YOUR_PRIVATE_KEY",
+        `Address = ${address}`,
+        `DNS = ${dns}`,
+        `MTU = ${mtu}`,
+        "",
+        `Jc = ${jc}`,
+        `Jmin = ${jmin}`,
+        `Jmax = ${jmax}`,
+        `S1 = ${s1}`,
+        `S2 = ${s2}`,
+        `S3 = ${s3}`,
+        `S4 = ${s4}`,
+        `H1 = ${h1}`,
+        `H2 = ${h2}`,
+        `H3 = ${h3}`,
+        `H4 = ${h4}`
+    ];
 
-Jc = ${jc}
-Jmin = ${jmin}
-Jmax = ${jmax}
-S1 = ${s1}
-S2 = ${s2}
-H1 = ${h1}
-H2 = ${h2}
-H3 = ${h3}
-H4 = ${h4}
+    // Add I1-I5 only when the user supplied them.
+    if (i1) lines.push(`I1 = ${i1}`);
+    if (i2) lines.push(`I2 = ${i2}`);
+    if (i3) lines.push(`I3 = ${i3}`);
+    if (i4) lines.push(`I4 = ${i4}`);
+    if (i5) lines.push(`I5 = ${i5}`);
 
-[Peer]
-PublicKey = YOUR_SERVER_PUBLIC_KEY
-AllowedIPs = 0.0.0.0/0
-Endpoint = ${server}:${port}
-PersistentKeepalive = 25`;
+    lines.push(
+        "",
+        "[Peer]",
+        `PublicKey = ${publicKey}`,
+        `AllowedIPs = ${allowedIPs}`,
+        `Endpoint = ${server}:${port}`,
+        `PersistentKeepalive = ${keepalive}`
+    );
 
-    configBox.value = config;
+    configBox.value = lines.join("\n");
 }
 
+generateBtn.addEventListener("click", generateConfig);
+
 copyBtn.addEventListener("click", async () => {
-    if (!configBox.value) {
+    if (!configBox.value.trim()) {
         alert("Generate a configuration first.");
         return;
     }
@@ -71,19 +236,30 @@ copyBtn.addEventListener("click", async () => {
         await navigator.clipboard.writeText(configBox.value);
         alert("Configuration copied.");
     } catch (error) {
-        alert("Could not copy the configuration.");
+        // Fallback for browsers where Clipboard API is unavailable.
+        configBox.focus();
+        configBox.select();
+
+        try {
+            document.execCommand("copy");
+            alert("Configuration copied.");
+        } catch (copyError) {
+            alert("Could not copy the configuration.");
+        }
     }
 });
 
 downloadBtn.addEventListener("click", () => {
-    if (!configBox.value) {
+    if (!configBox.value.trim()) {
         alert("Generate a configuration first.");
         return;
     }
 
     const blob = new Blob(
         [configBox.value],
-        { type: "text/plain;charset=utf-8" }
+        {
+            type: "text/plain;charset=utf-8"
+        }
     );
 
     const url = URL.createObjectURL(blob);
