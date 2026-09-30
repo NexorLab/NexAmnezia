@@ -1,4 +1,4 @@
-import { x25519 } from "https://cdn.jsdelivr.net/npm/@noble/curves@2.4.0/esm/ed25519.js";
+import { x25519 } from "https://cdn.jsdelivr.net/npm/@noble/curves@2.4.0/ed25519.js";
 
 const generateBtn = document.getElementById("generateBtn");
 const copyBtn = document.getElementById("copyBtn");
