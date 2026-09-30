@@ -10,6 +10,21 @@ body {
     color: #e2e8f0;
 }
 
+#newKeysBtn {
+    margin-top: 12px;
+    width: 100%;
+    background: #475569;
+}
+
+#newKeysBtn:hover {
+    background: #334155;
+}
+
+input[readonly] {
+    opacity: 0.9;
+    font-family: Consolas, monospace;
+}
+
 .container {
     max-width: 850px;
     margin: 0 auto;
