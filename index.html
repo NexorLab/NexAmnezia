@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexAmnezia - AmneziaWG Config Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>NexAmnezia</h1>
+            <p>AmneziaWG Config Generator</p>
+        </header>
+
+        <main>
+
+            <section class="card">
+
+                <h2>Server Settings</h2>
+
+                <label for="server">IP / Domain</label>
+                <input
+                    type="text"
+                    id="server"
+                    placeholder="Example: 1.2.3.4"
+                >
+
+                <label for="port">Port</label>
+                <input
+                    type="number"
+                    id="port"
+                    placeholder="Example: 51820"
+                >
+
+                <label for="mtu">MTU</label>
+                <input
+                    type="number"
+                    id="mtu"
+                    value="1280"
+                >
+
+            </section>
+
+            <section class="card">
+
+                <h2>AmneziaWG Parameters</h2>
+
+                <label for="jc">Jc</label>
+                <input type="number" id="jc" value="5">
+
+                <label for="jmin">Jmin</label>
+                <input type="number" id="jmin" value="50">
+
+                <label for="jmax">Jmax</label>
+                <input type="number" id="jmax" value="1000">
+
+                <label for="s1">S1</label>
+                <input type="number" id="s1" value="0">
+
+                <label for="s2">S2</label>
+                <input type="number" id="s2" value="0">
+
+                <label for="h1">H1</label>
+                <input type="number" id="h1" value="1">
+
+                <label for="h2">H2</label>
+                <input type="number" id="h2" value="2">
+
+                <label for="h3">H3</label>
+                <input type="number" id="h3" value="3">
+
+                <label for="h4">H4</label>
+                <input type="number" id="h4" value="4">
+
+            </section>
+
+            <button id="generateBtn">
+                Generate Config
+            </button>
+
+            <section class="card">
+
+                <h2>Generated Config</h2>
+
+                <textarea
+                    id="config"
+                    rows="15"
+                    readonly
+                    placeholder="Your AmneziaWG configuration will appear here..."
+                ></textarea>
+
+                <div class="buttons">
+                    <button id="copyBtn">Copy</button>
+                    <button id="downloadBtn">Download .conf</button>
+                </div>
+
+            </section>
+
+        </main>
+
+        <footer>
+            <p>NexAmnezia</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
