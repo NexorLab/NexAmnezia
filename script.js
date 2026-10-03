@@ -1255,6 +1255,70 @@ newKeysBtn.addEventListener(
     }
 );
 
+async function testWorkerConnection() {
+
+    try {
+
+        const response =
+            await fetch(
+                "https://nexamnezia-api.nexpanelpro.workers.dev/test",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        publicKey: clientPublicKey
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok || !data.ok) {
+
+            throw new Error(
+                data.error ||
+                "Worker test failed."
+            );
+
+        }
+
+
+        console.log(
+            "NexAmnezia Worker:",
+            data
+        );
+
+
+        alert(
+            "Worker connection successful!\n\n" +
+            "Public Key Length: " +
+            data.received.publicKeyLength
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Worker connection error:",
+            error
+        );
+
+
+        alert(
+            "Worker connection failed:\n\n" +
+            error.message
+        );
+
+    }
+
+}
 
 /*
  * Generate configuration.
