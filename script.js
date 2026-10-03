@@ -1127,6 +1127,9 @@ async function generateConfig() {
         `${selectedServer}:${selectedPort}`;
 
 
+    console.log("Selected Endpoint:", server);
+
+
     const serverPublicKey =
         warpPeer.publicKey;
 
