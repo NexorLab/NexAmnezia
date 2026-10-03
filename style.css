@@ -1,3 +1,4 @@
+```css
 * {
     box-sizing: border-box;
 }
@@ -5,7 +6,9 @@
 body {
     margin: 0;
     padding: 20px;
+
     font-family: Arial, sans-serif;
+
     background: #0f172a;
     color: #e2e8f0;
 }
@@ -15,69 +18,120 @@ body {
     margin: 0 auto;
 }
 
+
+/* =========================
+   HEADER
+========================= */
+
 header {
     text-align: center;
     margin-bottom: 25px;
 }
 
 header h1 {
-    margin-bottom: 8px;
+    margin: 0 0 8px;
+
     font-size: 32px;
 }
 
 header p {
     margin: 0;
+
     color: #94a3b8;
 }
 
+
+/* =========================
+   CARDS
+========================= */
+
 .card {
     background: #1e293b;
+
+    border: 1px solid #334155;
     border-radius: 12px;
+
     padding: 22px;
     margin-bottom: 20px;
-    border: 1px solid #334155;
 }
 
 .card h2 {
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+
     font-size: 20px;
 }
 
+
+/* =========================
+   LABELS / INPUTS
+========================= */
+
 label {
     display: block;
+
     margin: 14px 0 7px;
+
     font-weight: bold;
 }
 
 input,
 textarea {
     width: 100%;
+
     padding: 11px 12px;
+
     border: 1px solid #475569;
     border-radius: 7px;
+
     background: #0f172a;
     color: #e2e8f0;
+
     font-size: 15px;
 }
 
 input:focus,
 textarea:focus {
     outline: none;
+
     border-color: #60a5fa;
 }
 
 textarea {
     resize: vertical;
+
     font-family: Consolas, monospace;
 }
+
+
+/* =========================
+   HELP TEXT
+========================= */
+
+.help {
+    margin: 8px 0 12px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
 
 button {
     border: none;
     border-radius: 7px;
+
     padding: 12px 20px;
+
     font-size: 15px;
+
     cursor: pointer;
+
     background: #2563eb;
     color: white;
 }
@@ -88,14 +142,18 @@ button:hover {
 
 #generateBtn {
     width: 100%;
+
     margin-bottom: 20px;
+
     font-size: 17px;
     font-weight: bold;
 }
 
 .secondary-button {
     width: 100%;
+
     margin-top: 12px;
+
     background: #475569;
 }
 
@@ -105,7 +163,9 @@ button:hover {
 
 .buttons {
     display: flex;
+
     gap: 10px;
+
     margin-top: 12px;
 }
 
@@ -113,31 +173,32 @@ button:hover {
     flex: 1;
 }
 
-.help {
-    margin: 8px 0 12px;
-    color: #94a3b8;
-    font-size: 13px;
-    line-height: 1.5;
-}
 
-
-/* Endpoint presets */
+/* =========================
+   ENDPOINT PRESETS
+========================= */
 
 .endpoint-list {
     max-height: 230px;
+
     overflow-y: auto;
+
     border: 1px solid #475569;
     border-radius: 8px;
+
     background: #0f172a;
+
     padding: 5px;
 }
 
 .endpoint-item {
     display: flex;
+
     align-items: center;
     justify-content: space-between;
 
     padding: 11px 12px;
+
     margin-bottom: 3px;
 
     border-radius: 6px;
@@ -160,17 +221,21 @@ button:hover {
 
 .endpoint-item:hover {
     background: #1e3a5f;
+
     color: white;
 }
 
 .endpoint-item.selected {
     background: #164e63;
+
     color: #67e8f9;
+
     font-weight: bold;
 }
 
 .endpoint-tick {
     visibility: hidden;
+
     font-size: 18px;
 }
 
@@ -179,7 +244,9 @@ button:hover {
 }
 
 
-/* Scrollbar */
+/* =========================
+   ENDPOINT SCROLLBAR
+========================= */
 
 .endpoint-list::-webkit-scrollbar {
     width: 8px;
@@ -191,6 +258,7 @@ button:hover {
 
 .endpoint-list::-webkit-scrollbar-thumb {
     background: #475569;
+
     border-radius: 8px;
 }
 
@@ -199,12 +267,261 @@ button:hover {
 }
 
 
+/* =========================
+   JUNK PACKET PRESETS
+========================= */
+
+.preset-options {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 10px;
+
+    margin-top: 15px;
+}
+
+.preset-option {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    min-height: 78px;
+
+    margin: 0;
+
+    padding: 13px;
+
+    border: 1px solid #475569;
+    border-radius: 9px;
+
+    background: #0f172a;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease;
+}
+
+.preset-option:hover {
+    background: #172554;
+
+    border-color: #64748b;
+}
+
+.preset-option input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+}
+
+.preset-option:has(input:checked) {
+    background: #164e63;
+
+    border-color: #22d3ee;
+}
+
+.preset-content {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    width: 100%;
+
+    margin: 0;
+}
+
+.preset-content strong {
+    font-size: 16px;
+}
+
+.preset-content small {
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+}
+
+.preset-option:has(input:checked)
+.preset-content small {
+    color: #a5f3fc;
+}
+
+
+/* =========================
+   CONDITIONAL SECTIONS
+========================= */
+
+.conditional-section {
+    margin-top: 18px;
+
+    padding-top: 16px;
+
+    border-top: 1px solid #334155;
+}
+
+.hidden {
+    display: none;
+}
+
+
+/* =========================
+   AMNEZIA 1.5 TOGGLE
+========================= */
+
+.section-toggle-row {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.section-toggle-row h2 {
+    margin-bottom: 6px;
+}
+
+
+/* Switch */
+
+.switch {
+    position: relative;
+
+    display: block;
+
+    flex: 0 0 auto;
+
+    width: 52px;
+    height: 30px;
+
+    margin: 0;
+
+    cursor: pointer;
+}
+
+.switch input {
+    position: absolute;
+
+    width: 0;
+    height: 0;
+
+    opacity: 0;
+}
+
+.slider {
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: 30px;
+
+    background: #475569;
+
+    transition: 0.2s;
+}
+
+.slider::before {
+    content: "";
+
+    position: absolute;
+
+    width: 22px;
+    height: 22px;
+
+    left: 4px;
+    top: 4px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    transition: 0.2s;
+}
+
+.switch input:checked + .slider {
+    background: #0891b2;
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(22px);
+}
+
+
+/* =========================
+   ADVANCED PARAMETERS
+========================= */
+
+.advanced-toggle {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    width: 100%;
+
+    padding: 4px 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #e2e8f0;
+
+    text-align: left;
+
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.advanced-toggle:hover {
+    background: transparent;
+
+    color: #67e8f9;
+}
+
+#advancedArrow {
+    display: inline-block;
+
+    width: 18px;
+
+    color: #67e8f9;
+
+    transition: transform 0.15s ease;
+}
+
+.advanced-open #advancedArrow {
+    transform: rotate(90deg);
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
 footer {
     text-align: center;
+
     color: #64748b;
+
     padding: 10px;
 }
 
+
+/* =========================
+   MOBILE
+========================= */
 
 @media (max-width: 600px) {
 
@@ -214,6 +531,10 @@ footer {
 
     .card {
         padding: 16px;
+    }
+
+    .preset-options {
+        grid-template-columns: 1fr;
     }
 
     .buttons {
@@ -227,4 +548,9 @@ footer {
     .endpoint-list {
         max-height: 200px;
     }
+
+    .section-toggle-row {
+        align-items: flex-start;
+    }
 }
+```
