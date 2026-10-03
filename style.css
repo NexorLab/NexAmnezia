@@ -10,21 +10,6 @@ body {
     color: #e2e8f0;
 }
 
-#newKeysBtn {
-    margin-top: 12px;
-    width: 100%;
-    background: #475569;
-}
-
-#newKeysBtn:hover {
-    background: #334155;
-}
-
-input[readonly] {
-    opacity: 0.9;
-    font-family: Consolas, monospace;
-}
-
 .container {
     max-width: 850px;
     margin: 0 auto;
@@ -108,6 +93,16 @@ button:hover {
     font-weight: bold;
 }
 
+.secondary-button {
+    width: 100%;
+    margin-top: 12px;
+    background: #475569;
+}
+
+.secondary-button:hover {
+    background: #334155;
+}
+
 .buttons {
     display: flex;
     gap: 10px;
@@ -118,13 +113,101 @@ button:hover {
     flex: 1;
 }
 
+.help {
+    margin: 8px 0 12px;
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* Endpoint presets */
+
+.endpoint-list {
+    max-height: 230px;
+    overflow-y: auto;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    background: #0f172a;
+    padding: 5px;
+}
+
+.endpoint-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 11px 12px;
+    margin-bottom: 3px;
+
+    border-radius: 6px;
+
+    color: #cbd5e1;
+
+    cursor: pointer;
+
+    font-family: Consolas, monospace;
+    font-size: 14px;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.endpoint-item:last-child {
+    margin-bottom: 0;
+}
+
+.endpoint-item:hover {
+    background: #1e3a5f;
+    color: white;
+}
+
+.endpoint-item.selected {
+    background: #164e63;
+    color: #67e8f9;
+    font-weight: bold;
+}
+
+.endpoint-tick {
+    visibility: hidden;
+    font-size: 18px;
+}
+
+.endpoint-item.selected .endpoint-tick {
+    visibility: visible;
+}
+
+
+/* Scrollbar */
+
+.endpoint-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.endpoint-list::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.endpoint-list::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 8px;
+}
+
+.endpoint-list::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+
 footer {
     text-align: center;
     color: #64748b;
     padding: 10px;
 }
 
+
 @media (max-width: 600px) {
+
     body {
         padding: 12px;
     }
@@ -139,5 +222,9 @@ footer {
 
     header h1 {
         font-size: 27px;
+    }
+
+    .endpoint-list {
+        max-height: 200px;
     }
 }
