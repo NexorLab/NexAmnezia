@@ -159,17 +159,15 @@ function validateFields() {
 
     const serverPublicKey = getValue("publicKey");
 
-    if (!serverPublicKey) {
-        alert("Please enter the Server Public Key.");
-        return false;
-    }
-
-    if (!isValidBase64Key(serverPublicKey)) {
-        alert(
-            "Server Public Key must be a valid 32-byte Base64 WireGuard key."
-        );
-        return false;
-    }
+if (
+    serverPublicKey &&
+    !isValidBase64Key(serverPublicKey)
+) {
+    alert(
+        "Server Public Key must be a valid 32-byte Base64 WireGuard key."
+    );
+    return false;
+}
 
     if (!getValue("allowedIPs")) {
         alert("Please enter Allowed IPs.");
