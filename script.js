@@ -1115,8 +1115,16 @@ async function generateConfig() {
         warpData.config.peer;
 
 
+    const selectedServer =
+    getValue("server");
+
+    
+    const selectedPort =
+        getNumber("port");
+
+    
     const server =
-        warpPeer.endpoint;
+        `${selectedServer}:${selectedPort}`;
 
 
     const serverPublicKey =
