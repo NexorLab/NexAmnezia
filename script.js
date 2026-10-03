@@ -98,6 +98,7 @@ const endpointPresets = [
 
 let clientPrivateKey = "";
 let clientPublicKey = "";
+let warpData = null;
 
 
 /*
@@ -992,27 +993,163 @@ async function testWorkerConnection() {
  * ==========================================
  */
 
-function generateConfig() {
+async function generateConfig() {
 
     if (!validateFields()) {
         return;
     }
 
 
+    /*
+     * Get a real WARP configuration.
+     *
+     * The result is cached so repeated clicks
+     * do not create additional WARP registrations.
+     */
+
+    if (!warpData) {
+
+        try {
+
+            generateBtn.disabled = true;
+
+            generateBtn.textContent =
+                "Connecting to WARP...";
+
+
+            const response =
+                await fetch(
+                    "https://nexamnezia-api.nexpanelpro.workers.dev/warp",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            publicKey:
+                                clientPublicKey
+                        })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.ok
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "WARP API request failed."
+                );
+
+            }
+
+
+            /*
+             * Make sure the required WARP
+             * information exists.
+             */
+
+            if (
+                !data.config ||
+                !data.config.peer ||
+                !data.config.peer.publicKey ||
+                !data.config.peer.endpoint
+            ) {
+
+                throw new Error(
+                    "WARP API returned an incomplete configuration."
+                );
+
+            }
+
+
+            warpData = data;
+
+
+        } catch (error) {
+
+            console.error(
+                "NexAmnezia WARP error:",
+                error
+            );
+
+
+            alert(
+                "Could not get a WARP configuration.\n\n" +
+                error.message
+            );
+
+
+            return;
+
+        } finally {
+
+            generateBtn.disabled = false;
+
+            generateBtn.textContent =
+                "Generate Config";
+
+        }
+
+    }
+
+
+    /*
+     * WARP values
+     */
+
+    const warpInterface =
+        warpData.config.interface;
+
+
+    const warpPeer =
+        warpData.config.peer;
+
+
     const server =
-        getValue("server");
+        warpPeer.endpoint;
 
 
-    const port =
-        getNumber("port");
+    const serverPublicKey =
+        warpPeer.publicKey;
 
+
+    /*
+     * Use the real WARP IPv4 address.
+     *
+     * WARP returns it without the CIDR suffix,
+     * so /32 is added for WireGuard.
+     */
+
+    let address =
+        warpInterface.ipv4;
+
+
+    if (
+        address &&
+        !address.includes("/")
+    ) {
+
+        address += "/32";
+
+    }
+
+
+    /*
+     * User-controlled settings
+     */
 
     const mtu =
         getNumber("mtu");
-
-
-    const address =
-        getValue("address");
 
 
     const dns =
@@ -1053,10 +1190,6 @@ function generateConfig() {
 
     const h4 =
         getValue("h4");
-
-
-    const serverPublicKey =
-        getValue("publicKey");
 
 
     const allowedIPs =
@@ -1103,8 +1236,7 @@ function generateConfig() {
 
 
     /*
-     * I1-I5 are only added
-     * when the feature is enabled.
+     * I1-I5
      */
 
     if (
@@ -1150,30 +1282,46 @@ function generateConfig() {
     }
 
 
+    /*
+     * Real WARP Peer
+     */
+
     lines.push(
 
         "",
 
         "[Peer]",
 
-        `PublicKey = ${
-            serverPublicKey ||
-            "YOUR_SERVER_PUBLIC_KEY"
-        }`,
+        `PublicKey = ${serverPublicKey}`,
 
         `AllowedIPs = ${allowedIPs}`,
 
-        `Endpoint = ${server}:${port}`,
+        `Endpoint = ${server}`,
 
         `PersistentKeepalive = ${keepalive}`
 
     );
 
 
+    /*
+     * Display configuration
+     */
+
     configBox.value =
         lines.join("\n");
-}
 
+
+    /*
+     * Log WARP account information
+     * for the next UI step.
+     */
+
+    console.log(
+        "WARP Account Details:",
+        warpData.account
+    );
+
+}
 
 /*
  * ==========================================
