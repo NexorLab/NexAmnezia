@@ -1,18 +1,40 @@
+```javascript id="3g5v9m"
 const generateBtn = document.getElementById("generateBtn");
 const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const newKeysBtn = document.getElementById("newKeysBtn");
 
 const configBox = document.getElementById("config");
-const clientPublicKeyBox = document.getElementById("clientPublicKey");
-const endpointList = document.getElementById("endpointList");
+const clientPublicKeyBox =
+    document.getElementById("clientPublicKey");
+
+const endpointList =
+    document.getElementById("endpointList");
+
+const customJunkSettings =
+    document.getElementById("customJunkSettings");
+
+const enableIParameters =
+    document.getElementById("enableIParameters");
+
+const iParameters =
+    document.getElementById("iParameters");
+
+const advancedToggle =
+    document.getElementById("advancedToggle");
+
+const advancedParameters =
+    document.getElementById("advancedParameters");
 
 
 /*
- * Endpoint presets
- * 52 endpoints taken from the reference page.
+ * ==========================================
+ * ENDPOINT PRESETS
+ * ==========================================
  */
+
 const endpointPresets = [
+
     "8.6.112.224:5279",
     "8.6.112.46:903",
     "8.6.112.206:3854",
@@ -65,39 +87,64 @@ const endpointPresets = [
     "8.6.112.13:4177",
     "8.6.112.203:854",
     "8.6.112.161:7152"
+
 ];
 
+
+/*
+ * ==========================================
+ * CLIENT KEYS
+ * ==========================================
+ */
 
 let clientPrivateKey = "";
 let clientPublicKey = "";
 
 
 /*
- * Get text value from an input.
+ * ==========================================
+ * HELPERS
+ * ==========================================
  */
+
 function getValue(id) {
-    return document.getElementById(id).value.trim();
+
+    const element = document.getElementById(id);
+
+    if (!element) {
+        return "";
+    }
+
+    return element.value.trim();
 }
 
 
-/*
- * Get numeric value from an input.
- */
 function getNumber(id) {
+
     const value = getValue(id);
 
-    return value === "" ? null : Number(value);
+    if (value === "") {
+        return null;
+    }
+
+    return Number(value);
 }
 
 
 /*
- * Convert byte array to Base64.
+ * Convert Uint8Array to Base64.
  */
+
 function bytesToBase64(bytes) {
+
     let binary = "";
 
     for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
+
+        binary += String.fromCharCode(
+            bytes[i]
+        );
+
     }
 
     return btoa(binary);
@@ -105,44 +152,74 @@ function bytesToBase64(bytes) {
 
 
 /*
- * Generate client WireGuard-style key pair.
+ * ==========================================
+ * KEY GENERATION
+ * ==========================================
  */
+
 function generateClientKeys() {
 
     if (typeof nacl === "undefined") {
-        alert("Cryptographic library failed to load.");
+
+        alert(
+            "Cryptographic library failed to load."
+        );
+
         return false;
     }
 
-    const keyPair = nacl.box.keyPair();
 
-    clientPrivateKey = bytesToBase64(keyPair.secretKey);
-    clientPublicKey = bytesToBase64(keyPair.publicKey);
+    const keyPair =
+        nacl.box.keyPair();
 
-    clientPublicKeyBox.value = clientPublicKey;
+
+    clientPrivateKey =
+        bytesToBase64(
+            keyPair.secretKey
+        );
+
+
+    clientPublicKey =
+        bytesToBase64(
+            keyPair.publicKey
+        );
+
+
+    clientPublicKeyBox.value =
+        clientPublicKey;
+
 
     return true;
 }
 
 
 /*
- * Validate a Base64 32-byte key.
+ * ==========================================
+ * BASE64 KEY VALIDATION
+ * ==========================================
  */
+
 function isValidBase64Key(value) {
 
     if (!value) {
         return false;
     }
 
+
     try {
 
-        const normalized = value.trim();
+        const normalized =
+            value.trim();
+
 
         if (normalized.length !== 44) {
             return false;
         }
 
-        const decoded = atob(normalized);
+
+        const decoded =
+            atob(normalized);
+
 
         return decoded.length === 32;
 
@@ -154,109 +231,382 @@ function isValidBase64Key(value) {
 
 
 /*
- * Create endpoint preset list.
+ * ==========================================
+ * ENDPOINT LIST
+ * ==========================================
  */
+
 function buildEndpointList() {
 
     endpointList.innerHTML = "";
 
-    endpointPresets.forEach((endpoint) => {
 
-        const item = document.createElement("div");
+    endpointPresets.forEach(
+        (endpoint) => {
 
-        item.className = "endpoint-item";
+            const item =
+                document.createElement("div");
 
-        item.dataset.endpoint = endpoint;
 
-        const text = document.createElement("span");
+            item.className =
+                "endpoint-item";
 
-        text.className = "endpoint-ip";
 
-        text.textContent = endpoint;
+            item.dataset.endpoint =
+                endpoint;
 
-        const tick = document.createElement("span");
 
-        tick.className = "endpoint-tick";
+            const text =
+                document.createElement("span");
 
-        tick.textContent = "✓";
 
-        item.appendChild(text);
-        item.appendChild(tick);
+            text.className =
+                "endpoint-ip";
 
-        item.addEventListener("click", () => {
 
-            selectEndpoint(item, endpoint);
+            text.textContent =
+                endpoint;
 
-        });
 
-        endpointList.appendChild(item);
+            const tick =
+                document.createElement("span");
 
-    });
+
+            tick.className =
+                "endpoint-tick";
+
+
+            tick.textContent =
+                "✓";
+
+
+            item.appendChild(text);
+
+            item.appendChild(tick);
+
+
+            item.addEventListener(
+                "click",
+                () => {
+
+                    selectEndpoint(
+                        item,
+                        endpoint
+                    );
+
+                }
+            );
+
+
+            endpointList.appendChild(item);
+
+        }
+    );
 }
 
 
 /*
- * Select an endpoint and fill IP / Port fields.
+ * Select an endpoint.
  */
-function selectEndpoint(item, endpoint) {
 
-    const separator = endpoint.lastIndexOf(":");
+function selectEndpoint(
+    item,
+    endpoint
+) {
+
+    const separator =
+        endpoint.lastIndexOf(":");
+
 
     if (separator === -1) {
         return;
     }
 
-    const server = endpoint.substring(0, separator);
-    const port = endpoint.substring(separator + 1);
 
-    document.getElementById("server").value = server;
-    document.getElementById("port").value = port;
+    const server =
+        endpoint.substring(
+            0,
+            separator
+        );
+
+
+    const port =
+        endpoint.substring(
+            separator + 1
+        );
+
+
+    document.getElementById(
+        "server"
+    ).value = server;
+
+
+    document.getElementById(
+        "port"
+    ).value = port;
+
 
     document
-        .querySelectorAll(".endpoint-item")
-        .forEach((element) => {
-            element.classList.remove("selected");
-        });
+        .querySelectorAll(
+            ".endpoint-item"
+        )
+        .forEach(
+            (element) => {
 
-    item.classList.add("selected");
+                element.classList.remove(
+                    "selected"
+                );
+
+            }
+        );
+
+
+    item.classList.add(
+        "selected"
+    );
+
 
     configBox.value = "";
 }
 
 
 /*
- * Select the default endpoint.
+ * Default endpoint.
  */
+
 function selectDefaultEndpoint() {
 
-    const defaultEndpoint = "8.6.112.138:987";
+    const defaultEndpoint =
+        "8.6.112.138:987";
 
-    const item = Array.from(
-        document.querySelectorAll(".endpoint-item")
-    ).find(
-        (element) =>
-            element.dataset.endpoint === defaultEndpoint
-    );
+
+    const item =
+        Array.from(
+            document.querySelectorAll(
+                ".endpoint-item"
+            )
+        ).find(
+            (element) =>
+                element.dataset.endpoint ===
+                defaultEndpoint
+        );
+
 
     if (item) {
-        selectEndpoint(item, defaultEndpoint);
+
+        selectEndpoint(
+            item,
+            defaultEndpoint
+        );
+
     }
 }
 
 
 /*
- * Validate a number field.
+ * ==========================================
+ * JUNK PACKET PRESETS
+ * ==========================================
  */
-function validateNumber(id, name, min, max) {
 
-    const value = getNumber(id);
+const junkPresets = {
+
+    light: {
+
+        jc: 3,
+        jmin: 1,
+        jmax: 3
+
+    },
+
+    heavy: {
+
+        jc: 5,
+        jmin: 10,
+        jmax: 40
+
+    }
+
+};
+
+
+/*
+ * Set Junk Packet values.
+ */
+
+function setJunkValues(
+    jc,
+    jmin,
+    jmax
+) {
+
+    document.getElementById(
+        "jc"
+    ).value = jc;
+
+
+    document.getElementById(
+        "jmin"
+    ).value = jmin;
+
+
+    document.getElementById(
+        "jmax"
+    ).value = jmax;
+}
+
+
+/*
+ * Apply selected Junk Packet mode.
+ */
+
+function updateJunkPreset() {
+
+    const selected =
+        document.querySelector(
+            'input[name="junkPreset"]:checked'
+        );
+
+
+    if (!selected) {
+        return;
+    }
+
+
+    const mode =
+        selected.value;
+
+
+    if (
+        mode === "light" ||
+        mode === "heavy"
+    ) {
+
+        const preset =
+            junkPresets[mode];
+
+
+        setJunkValues(
+            preset.jc,
+            preset.jmin,
+            preset.jmax
+        );
+
+
+        customJunkSettings.classList.add(
+            "hidden"
+        );
+
+
+        return;
+    }
+
+
+    if (mode === "custom") {
+
+        customJunkSettings.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/*
+ * ==========================================
+ * AMNEZIA 1.5 I1-I5
+ * ==========================================
+ */
+
+function updateIParametersVisibility() {
+
+    if (
+        enableIParameters.checked
+    ) {
+
+        iParameters.classList.remove(
+            "hidden"
+        );
+
+    } else {
+
+        iParameters.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/*
+ * ==========================================
+ * ADVANCED PARAMETERS
+ * ==========================================
+ */
+
+function toggleAdvancedParameters() {
+
+    const isHidden =
+        advancedParameters.classList.contains(
+            "hidden"
+        );
+
+
+    if (isHidden) {
+
+        advancedParameters.classList.remove(
+            "hidden"
+        );
+
+
+        advancedToggle.classList.add(
+            "advanced-open"
+        );
+
+    } else {
+
+        advancedParameters.classList.add(
+            "hidden"
+        );
+
+
+        advancedToggle.classList.remove(
+            "advanced-open"
+        );
+
+    }
+
+}
+
+
+/*
+ * ==========================================
+ * VALIDATION
+ * ==========================================
+ */
+
+function validateNumber(
+    id,
+    name,
+    min,
+    max
+) {
+
+    const value =
+        getNumber(id);
+
 
     if (value === null) {
 
-        alert(`${name} is required.`);
+        alert(
+            `${name} is required.`
+        );
 
         return false;
     }
+
 
     if (
         !Number.isInteger(value) ||
@@ -271,30 +621,40 @@ function validateNumber(id, name, min, max) {
         return false;
     }
 
+
     return true;
 }
 
 
 /*
- * Validate server / IP / domain.
+ * Validate server.
  */
+
 function validateServer() {
 
-    const server = getValue("server");
+    const server =
+        getValue("server");
+
 
     if (!server) {
 
-        alert("Please enter an IP address or domain.");
+        alert(
+            "Please enter an IP address or domain."
+        );
 
         return false;
     }
+
 
     if (/\s/.test(server)) {
 
-        alert("IP / Domain must not contain spaces.");
+        alert(
+            "IP / Domain must not contain spaces."
+        );
 
         return false;
     }
+
 
     return true;
 }
@@ -303,16 +663,22 @@ function validateServer() {
 /*
  * Validate port.
  */
+
 function validatePort() {
 
-    const port = getNumber("port");
+    const port =
+        getNumber("port");
+
 
     if (port === null) {
 
-        alert("Please enter a port.");
+        alert(
+            "Please enter a port."
+        );
 
         return false;
     }
+
 
     if (
         !Number.isInteger(port) ||
@@ -320,23 +686,35 @@ function validatePort() {
         port > 65535
     ) {
 
-        alert("Port must be between 1 and 65535.");
+        alert(
+            "Port must be between 1 and 65535."
+        );
 
         return false;
     }
+
 
     return true;
 }
 
 
 /*
- * Validate all form fields.
+ * ==========================================
+ * MAIN VALIDATION
+ * ==========================================
  */
+
 function validateFields() {
 
-    if (!validateServer()) return false;
+    if (!validateServer()) {
+        return false;
+    }
 
-    if (!validatePort()) return false;
+
+    if (!validatePort()) {
+        return false;
+    }
+
 
     if (
         !validateNumber(
@@ -346,23 +724,34 @@ function validateFields() {
             9000
         )
     ) {
+
         return false;
     }
+
 
     if (!getValue("address")) {
 
-        alert("Please enter a client address.");
+        alert(
+            "Please enter a client address."
+        );
 
         return false;
     }
+
 
     if (!getValue("dns")) {
 
-        alert("Please enter a DNS server.");
+        alert(
+            "Please enter a DNS server."
+        );
 
         return false;
     }
 
+
+    /*
+     * Junk Packet validation.
+     */
 
     if (
         !validateNumber(
@@ -372,8 +761,10 @@ function validateFields() {
             128
         )
     ) {
+
         return false;
     }
+
 
     if (
         !validateNumber(
@@ -383,8 +774,10 @@ function validateFields() {
             65535
         )
     ) {
+
         return false;
     }
+
 
     if (
         !validateNumber(
@@ -394,9 +787,31 @@ function validateFields() {
             65535
         )
     ) {
+
         return false;
     }
 
+
+    const jmin =
+        getNumber("jmin");
+
+    const jmax =
+        getNumber("jmax");
+
+
+    if (jmin > jmax) {
+
+        alert(
+            "Jmin cannot be greater than Jmax."
+        );
+
+        return false;
+    }
+
+
+    /*
+     * Advanced S parameters.
+     */
 
     if (
         !validateNumber(
@@ -406,8 +821,10 @@ function validateFields() {
             65535
         )
     ) {
+
         return false;
     }
+
 
     if (
         !validateNumber(
@@ -417,56 +834,50 @@ function validateFields() {
             65535
         )
     ) {
+
         return false;
     }
 
-    if (
-        !validateNumber(
-            "s3",
-            "S3",
-            0,
-            65535
-        )
-    ) {
-        return false;
-    }
 
-    if (
-        !validateNumber(
-            "s4",
-            "S4",
-            0,
-            65535
-        )
-    ) {
-        return false;
-    }
-
+    /*
+     * H parameters.
+     */
 
     if (!getValue("h1")) {
 
-        alert("Please enter H1.");
+        alert(
+            "Please enter H1."
+        );
 
         return false;
     }
+
 
     if (!getValue("h2")) {
 
-        alert("Please enter H2.");
+        alert(
+            "Please enter H2."
+        );
 
         return false;
     }
+
 
     if (!getValue("h3")) {
 
-        alert("Please enter H3.");
+        alert(
+            "Please enter H3."
+        );
 
         return false;
     }
 
+
     if (!getValue("h4")) {
 
-        alert("Please enter H4.");
+        alert(
+            "Please enter H4."
+        );
 
         return false;
     }
@@ -475,11 +886,16 @@ function validateFields() {
     /*
      * Server Public Key is optional.
      */
-    const serverPublicKey = getValue("publicKey");
+
+    const serverPublicKey =
+        getValue("publicKey");
+
 
     if (
         serverPublicKey &&
-        !isValidBase64Key(serverPublicKey)
+        !isValidBase64Key(
+            serverPublicKey
+        )
     ) {
 
         alert(
@@ -492,7 +908,9 @@ function validateFields() {
 
     if (!getValue("allowedIPs")) {
 
-        alert("Please enter Allowed IPs.");
+        alert(
+            "Please enter Allowed IPs."
+        );
 
         return false;
     }
@@ -506,9 +924,14 @@ function validateFields() {
             65535
         )
     ) {
+
         return false;
     }
 
+
+    /*
+     * Generate client keys if needed.
+     */
 
     if (
         !clientPrivateKey ||
@@ -518,6 +941,7 @@ function validateFields() {
         if (!generateClientKeys()) {
             return false;
         }
+
     }
 
 
@@ -526,8 +950,11 @@ function validateFields() {
 
 
 /*
- * Generate configuration.
+ * ==========================================
+ * GENERATE CONFIG
+ * ==========================================
  */
+
 function generateConfig() {
 
     if (!validateFields()) {
@@ -535,43 +962,72 @@ function generateConfig() {
     }
 
 
-    const server = getValue("server");
-    const port = getNumber("port");
-
-    const mtu = getNumber("mtu");
-    const address = getValue("address");
-    const dns = getValue("dns");
+    const server =
+        getValue("server");
 
 
-    const jc = getNumber("jc");
-    const jmin = getNumber("jmin");
-    const jmax = getNumber("jmax");
+    const port =
+        getNumber("port");
 
 
-    const s1 = getNumber("s1");
-    const s2 = getNumber("s2");
-    const s3 = getNumber("s3");
-    const s4 = getNumber("s4");
+    const mtu =
+        getNumber("mtu");
 
 
-    const h1 = getValue("h1");
-    const h2 = getValue("h2");
-    const h3 = getValue("h3");
-    const h4 = getValue("h4");
+    const address =
+        getValue("address");
 
 
-    const i1 = getValue("i1");
-    const i2 = getValue("i2");
-    const i3 = getValue("i3");
-    const i4 = getValue("i4");
-    const i5 = getValue("i5");
+    const dns =
+        getValue("dns");
 
 
-    const serverPublicKey = getValue("publicKey");
+    const jc =
+        getNumber("jc");
 
-    const allowedIPs = getValue("allowedIPs");
 
-    const keepalive = getNumber("keepalive");
+    const jmin =
+        getNumber("jmin");
+
+
+    const jmax =
+        getNumber("jmax");
+
+
+    const s1 =
+        getNumber("s1");
+
+
+    const s2 =
+        getNumber("s2");
+
+
+    const h1 =
+        getValue("h1");
+
+
+    const h2 =
+        getValue("h2");
+
+
+    const h3 =
+        getValue("h3");
+
+
+    const h4 =
+        getValue("h4");
+
+
+    const serverPublicKey =
+        getValue("publicKey");
+
+
+    const allowedIPs =
+        getValue("allowedIPs");
+
+
+    const keepalive =
+        getNumber("keepalive");
 
 
     const lines = [
@@ -598,10 +1054,6 @@ function generateConfig() {
 
         `S2 = ${s2}`,
 
-        `S3 = ${s3}`,
-
-        `S4 = ${s4}`,
-
         `H1 = ${h1}`,
 
         `H2 = ${h2}`,
@@ -613,24 +1065,51 @@ function generateConfig() {
     ];
 
 
-    if (i1) {
-        lines.push(`I1 = ${i1}`);
-    }
+    /*
+     * I1-I5 are only added
+     * when the feature is enabled.
+     */
 
-    if (i2) {
-        lines.push(`I2 = ${i2}`);
-    }
+    if (
+        enableIParameters.checked
+    ) {
 
-    if (i3) {
-        lines.push(`I3 = ${i3}`);
-    }
+        const i1 =
+            getValue("i1");
 
-    if (i4) {
-        lines.push(`I4 = ${i4}`);
-    }
+        const i2 =
+            getValue("i2");
 
-    if (i5) {
-        lines.push(`I5 = ${i5}`);
+        const i3 =
+            getValue("i3");
+
+        const i4 =
+            getValue("i4");
+
+        const i5 =
+            getValue("i5");
+
+
+        if (i1) {
+            lines.push(`I1 = ${i1}`);
+        }
+
+        if (i2) {
+            lines.push(`I2 = ${i2}`);
+        }
+
+        if (i3) {
+            lines.push(`I3 = ${i3}`);
+        }
+
+        if (i4) {
+            lines.push(`I4 = ${i4}`);
+        }
+
+        if (i5) {
+            lines.push(`I5 = ${i5}`);
+        }
+
     }
 
 
@@ -654,13 +1133,72 @@ function generateConfig() {
     );
 
 
-    configBox.value = lines.join("\n");
+    configBox.value =
+        lines.join("\n");
 }
+
+
+/*
+ * ==========================================
+ * EVENT LISTENERS
+ * ==========================================
+ */
+
+
+/*
+ * Junk Packet radio buttons.
+ */
+
+document
+    .querySelectorAll(
+        'input[name="junkPreset"]'
+    )
+    .forEach(
+        (radio) => {
+
+            radio.addEventListener(
+                "change",
+                updateJunkPreset
+            );
+
+        }
+    );
+
+
+/*
+ * Amnezia 1.5 switch.
+ */
+
+enableIParameters.addEventListener(
+    "change",
+    () => {
+
+        updateIParametersVisibility();
+
+        configBox.value = "";
+
+    }
+);
+
+
+/*
+ * Advanced section.
+ */
+
+advancedToggle.addEventListener(
+    "click",
+    () => {
+
+        toggleAdvancedParameters();
+
+    }
+);
 
 
 /*
  * Generate new client keys.
  */
+
 newKeysBtn.addEventListener(
     "click",
     () => {
@@ -669,17 +1207,22 @@ newKeysBtn.addEventListener(
             return;
         }
 
+
         configBox.value = "";
 
-        alert("New client keys generated.");
+
+        alert(
+            "New client keys generated."
+        );
 
     }
 );
 
 
 /*
- * Generate configuration button.
+ * Generate configuration.
  */
+
 generateBtn.addEventListener(
     "click",
     generateConfig
@@ -689,6 +1232,7 @@ generateBtn.addEventListener(
 /*
  * Copy configuration.
  */
+
 copyBtn.addEventListener(
     "click",
     async () => {
@@ -709,6 +1253,7 @@ copyBtn.addEventListener(
                 configBox.value
             );
 
+
             alert(
                 "Configuration copied."
             );
@@ -719,9 +1264,13 @@ copyBtn.addEventListener(
 
             configBox.select();
 
+
             try {
 
-                document.execCommand("copy");
+                document.execCommand(
+                    "copy"
+                );
+
 
                 alert(
                     "Configuration copied."
@@ -732,8 +1281,11 @@ copyBtn.addEventListener(
                 alert(
                     "Could not copy the configuration."
                 );
+
             }
+
         }
+
     }
 );
 
@@ -741,6 +1293,7 @@ copyBtn.addEventListener(
 /*
  * Download configuration.
  */
+
 downloadBtn.addEventListener(
     "click",
     () => {
@@ -755,13 +1308,14 @@ downloadBtn.addEventListener(
         }
 
 
-        const blob = new Blob(
-            [configBox.value],
-            {
-                type:
-                    "text/plain;charset=utf-8"
-            }
-        );
+        const blob =
+            new Blob(
+                [configBox.value],
+                {
+                    type:
+                        "text/plain;charset=utf-8"
+                }
+            );
 
 
         const url =
@@ -774,15 +1328,22 @@ downloadBtn.addEventListener(
 
         link.href = url;
 
+
         link.download =
             "nexamnezia.conf";
 
 
-        document.body.appendChild(link);
+        document.body.appendChild(
+            link
+        );
+
 
         link.click();
 
-        document.body.removeChild(link);
+
+        document.body.removeChild(
+            link
+        );
 
 
         URL.revokeObjectURL(url);
@@ -792,10 +1353,18 @@ downloadBtn.addEventListener(
 
 
 /*
- * Build endpoint list and initialize page.
+ * ==========================================
+ * INITIALIZE PAGE
+ * ==========================================
  */
+
 buildEndpointList();
 
 selectDefaultEndpoint();
 
 generateClientKeys();
+
+updateJunkPreset();
+
+updateIParametersVisibility();
+```
