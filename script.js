@@ -1,4 +1,3 @@
-```javascript id="3g5v9m"
 const generateBtn = document.getElementById("generateBtn");
 const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
@@ -1367,4 +1366,3 @@ generateClientKeys();
 updateJunkPreset();
 
 updateIParametersVisibility();
-```
