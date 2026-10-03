@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>NexAmnezia - AmneziaWG Config Generator</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
-    
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
 </head>
 
 <body>
@@ -24,7 +25,18 @@
         <section class="card">
             <h2>Server Settings</h2>
 
+            <label>Endpoint Presets</label>
+
+            <div id="endpointList" class="endpoint-list">
+                <!-- Endpoint presets are loaded by JavaScript -->
+            </div>
+
+            <p class="help">
+                Select a preset above, or enter your own IP / Domain and Port below.
+            </p>
+
             <label for="server">IP / Domain</label>
+
             <input
                 type="text"
                 id="server"
@@ -32,6 +44,7 @@
             >
 
             <label for="port">Port</label>
+
             <input
                 type="number"
                 id="port"
@@ -41,6 +54,7 @@
             >
 
             <label for="mtu">MTU</label>
+
             <input
                 type="number"
                 id="mtu"
@@ -50,6 +64,7 @@
             >
 
             <label for="address">Client Address</label>
+
             <input
                 type="text"
                 id="address"
@@ -57,6 +72,7 @@
             >
 
             <label for="dns">DNS</label>
+
             <input
                 type="text"
                 id="dns"
@@ -64,21 +80,27 @@
             >
 
             <label for="clientPublicKey">Client Public Key</label>
-			<input
-			    type="text"
-			    id="clientPublicKey"
-			    readonly
-			    placeholder="Generated automatically"
-			>
-			
-			<button type="button" id="newKeysBtn">
-			    Generate New Keys
-			</button>
-            
+
+            <input
+                type="text"
+                id="clientPublicKey"
+                readonly
+                placeholder="Generated automatically"
+            >
+
+            <button
+                type="button"
+                id="newKeysBtn"
+                class="secondary-button"
+            >
+                Generate New Keys
+            </button>
+
         </section>
 
 
         <section class="card">
+
             <h2>AmneziaWG Parameters</h2>
 
             <label for="jc">Jc</label>
@@ -143,10 +165,12 @@
                 max="65535"
                 value="0"
             >
+
         </section>
 
 
         <section class="card">
+
             <h2>Header Parameters</h2>
 
             <label for="h1">H1</label>
@@ -180,10 +204,12 @@
                 value="4"
                 placeholder="Example: 4"
             >
+
         </section>
 
 
         <section class="card">
+
             <h2>Amnezia I Parameters</h2>
 
             <p class="help">
@@ -224,20 +250,28 @@
                 id="i5"
                 placeholder="Optional"
             >
+
         </section>
 
 
         <section class="card">
+
             <h2>Peer Settings</h2>
 
             <label for="publicKey">Server Public Key</label>
+
             <input
                 type="text"
                 id="publicKey"
-                placeholder="Server public key"
+                placeholder="Optional - Server public key"
             >
 
+            <p class="help">
+                Server Public Key is optional for draft/test configuration.
+            </p>
+
             <label for="allowedIPs">Allowed IPs</label>
+
             <input
                 type="text"
                 id="allowedIPs"
@@ -245,6 +279,7 @@
             >
 
             <label for="keepalive">Persistent Keepalive</label>
+
             <input
                 type="number"
                 id="keepalive"
@@ -252,15 +287,20 @@
                 max="65535"
                 value="25"
             >
+
         </section>
 
 
-        <button id="generateBtn">
+        <button
+            type="button"
+            id="generateBtn"
+        >
             Generate Config
         </button>
 
 
         <section class="card">
+
             <h2>Generated Config</h2>
 
             <textarea
@@ -271,9 +311,23 @@
             ></textarea>
 
             <div class="buttons">
-                <button id="copyBtn">Copy</button>
-                <button id="downloadBtn">Download .conf</button>
+
+                <button
+                    type="button"
+                    id="copyBtn"
+                >
+                    Copy
+                </button>
+
+                <button
+                    type="button"
+                    id="downloadBtn"
+                >
+                    Download .conf
+                </button>
+
             </div>
+
         </section>
 
     </main>
@@ -284,6 +338,7 @@
     </footer>
 
 </div>
+
 
 <script src="script.js"></script>
 
