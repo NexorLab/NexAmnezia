@@ -16,6 +16,9 @@ const customJunkSettings =
 const enableIParameters =
     document.getElementById("enableIParameters");
 
+const awgVersionSelect = document.getElementById("awgVersion");
+const awg2SParameters = document.getElementById("awg2SParameters");
+
 const iParameters =
     document.getElementById("iParameters");
 
@@ -540,6 +543,12 @@ function updateIParametersVisibility() {
 }
 
 
+function updateAwgVersionVisibility() {
+    const isAwg2 = awgVersionSelect.value === "2.0";
+    awg2SParameters.classList.toggle("hidden", !isAwg2);
+    configBox.value = "";
+}
+
 /*
  * ==========================================
  * ADVANCED PARAMETERS
@@ -586,6 +595,44 @@ function toggleAdvancedParameters() {
  * VALIDATION
  * ==========================================
  */
+
+function parseHRange(value, name) {
+    const match = value.trim().match(/^(\d+)(?:\s*-\s*(\d+))?$/);
+    if (!match) {
+        alert(name + " must be a number or a range such as 100-200.");
+        return null;
+    }
+    const start = Number(match[1]);
+    const end = match[2] === undefined ? start : Number(match[2]);
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) ||
+        start < 0 || end < start || end > 4294967295) {
+        alert(name + " must be a valid unsigned 32-bit range.");
+        return null;
+    }
+    return { start, end };
+}
+
+function validateHParameters() {
+    const ranges = [];
+    for (const id of ["h1", "h2", "h3", "h4"]) {
+        const range = parseHRange(getValue(id), id.toUpperCase());
+        if (!range) return false;
+        if (awgVersionSelect.value !== "2.0" && range.start !== range.end) {
+            alert("H parameter ranges require AmneziaWG 2.0. Use a single number in AWG 1.5.");
+            return false;
+        }
+        ranges.push({ start: range.start, end: range.end, name: id.toUpperCase() });
+    }
+    for (let i = 0; i < ranges.length; i++) {
+        for (let k = i + 1; k < ranges.length; k++) {
+            if (ranges[i].start <= ranges[k].end && ranges[k].start <= ranges[i].end) {
+                alert(ranges[i].name + " and " + ranges[k].name + " ranges must not overlap.");
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
 function validateNumber(
     id,
@@ -840,47 +887,17 @@ function validateFields() {
 
 
     /*
-     * H parameters.
+     * S3/S4 are emitted only for AWG 2.0.
      */
-
-    if (!getValue("h1")) {
-
-        alert(
-            "Please enter H1."
-        );
-
-        return false;
+    if (awgVersionSelect.value === "2.0") {
+        if (!validateNumber("s3", "S3", 0, 65535)) return false;
+        if (!validateNumber("s4", "S4", 0, 65535)) return false;
     }
 
-
-    if (!getValue("h2")) {
-
-        alert(
-            "Please enter H2."
-        );
-
-        return false;
-    }
-
-
-    if (!getValue("h3")) {
-
-        alert(
-            "Please enter H3."
-        );
-
-        return false;
-    }
-
-
-    if (!getValue("h4")) {
-
-        alert(
-            "Please enter H4."
-        );
-
-        return false;
-    }
+    /*
+     * H values can be numbers or ranges and must not overlap.
+     */
+    if (!validateHParameters()) return false;
 
 
     /*
@@ -1130,8 +1147,9 @@ async function generateConfig() {
     console.log("Selected Endpoint:", server);
 
 
+    // Prefer the user-supplied key for a custom endpoint; fall back to WARP's key.
     const serverPublicKey =
-        warpPeer.publicKey;
+        getValue("publicKey") || warpPeer.publicKey;
 
 
     /*
@@ -1186,6 +1204,9 @@ async function generateConfig() {
     const s2 =
         getNumber("s2");
 
+    const s3 = getNumber("s3");
+    const s4 = getNumber("s4");
+    const awgVersion = awgVersionSelect.value;
 
     const h1 =
         getValue("h1");
@@ -1233,17 +1254,20 @@ async function generateConfig() {
 
         `S1 = ${s1}`,
 
-        `S2 = ${s2}`,
-
-        `H1 = ${h1}`,
-
-        `H2 = ${h2}`,
-
-        `H3 = ${h3}`,
-
-        `H4 = ${h4}`
+        `S2 = ${s2}`
 
     ];
+
+    if (awgVersion === "2.0") {
+        lines.push(`S3 = ${s3}`, `S4 = ${s4}`);
+    }
+
+    lines.push(
+        `H1 = ${h1}`,
+        `H2 = ${h2}`,
+        `H3 = ${h3}`,
+        `H4 = ${h4}`
+    );
 
 
     /*
@@ -1362,7 +1386,14 @@ document
 
 
 /*
- * Amnezia 1.5 switch.
+ * AmneziaWG version selector.
+ */
+
+awgVersionSelect.addEventListener("change", updateAwgVersionVisibility);
+
+
+/*
+ * Packet camouflage switch.
  */
 
 enableIParameters.addEventListener(
@@ -1627,3 +1658,5 @@ generateClientKeys();
 updateJunkPreset();
 
 updateIParametersVisibility();
+
+updateAwgVersionVisibility();
