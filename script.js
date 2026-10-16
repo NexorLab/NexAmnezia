@@ -19,8 +19,14 @@ const enableIParameters =
 const awgVersionSelect = document.getElementById("awgVersion");
 const awg2SParameters = document.getElementById("awg2SParameters");
 
+
 const iParameters =
     document.getElementById("iParameters");
+
+// Default SIP camouflage values from the user's reference configuration.
+const defaultI1 = "<b 0x494e56495445207369703a626f624062696c6f78692e636f6d205349502f322e300d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a4d61782d466f7277617264733a2037300d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e746163743a203c7369703a616c69636540706333332e61746c616e74612e636f6d3e0d0a436f6e74656e742d547970653a206170706c69636174696f6e2f7364700d0a436f6e74656e742d4c656e6774683a20300d0a0d0a>";
+const defaultI2 = "<b 0x5349502f322e302031303020547279696e670d0a5669613a205349502f322e302f55445020706333332e61746c616e74612e636f6d3b6272616e63683d7a39684734624b3737366173646864730d0a546f3a20426f62203c7369703a626f624062696c6f78692e636f6d3e0d0a46726f6d3a20416c696365203c7369703a616c6963654061746c616e74612e636f6d3e3b7461673d313932383330313737340d0a43616c6c2d49443a20613834623463373665363637313040706333332e61746c616e74612e636f6d0d0a435365713a2033313431353920494e564954450d0a436f6e74656e742d4c656e6774683a20300d0a0d0a>";
+
 
 const advancedToggle =
     document.getElementById("advancedToggle");
@@ -933,15 +939,9 @@ function validateFields() {
     }
 
 
-    if (
-        !validateNumber(
-            "keepalive",
-            "Persistent Keepalive",
-            0,
-            65535
-        )
-    ) {
-
+    // PersistentKeepalive is optional; validate it only when provided.
+    if (getValue("keepalive") !== "" &&
+        !validateNumber("keepalive", "Persistent Keepalive", 0, 65535)) {
         return false;
     }
 
@@ -1293,11 +1293,14 @@ async function generateConfig() {
 
         `AllowedIPs = ${allowedIPs}`,
 
-        `Endpoint = ${server}`,
-
-        `PersistentKeepalive = ${keepalive}`
+        `Endpoint = ${server}`
 
     );
+
+    // Only include PersistentKeepalive when the user supplied a value.
+    if (getValue("keepalive") !== "") {
+        lines.push(`PersistentKeepalive = ${keepalive}`);
+    }
 
 
     /*
@@ -1552,6 +1555,10 @@ buildEndpointList();
 selectDefaultEndpoint();
 
 generateClientKeys();
+
+// Pre-fill the two SIP camouflage parameters from the reference config.
+document.getElementById("i1").value = defaultI1;
+document.getElementById("i2").value = defaultI2;
 
 updateJunkPreset();
 
