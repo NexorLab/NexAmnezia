@@ -254,18 +254,28 @@
 
 
         <!-- =========================
-             AMNEZIA 1.5
+             AMNEZIAWG VERSION
         ========================== -->
 
         <section class="card">
 
+            <h2>AmneziaWG Version</h2>
+            <label for="awgVersion">Protocol version</label>
+            <select id="awgVersion">
+                <option value="1.5" selected>AmneziaWG 1.5 (compatibility)</option>
+                <option value="2.0">AmneziaWG 2.0</option>
+            </select>
+            <p class="help">
+                Choose the version supported by your server. Version 2.0 adds S3/S4 and supports H parameter ranges.
+            </p>
+
             <div class="section-toggle-row">
 
                 <div>
-                    <h2>Amnezia 1.5</h2>
+                    <h2>Packet Camouflage (I1-I5)</h2>
 
                     <p class="help">
-                        Enable protocol-specific I1-I5 parameters.
+                        Enable protocol-specific I1-I5 parameters (available in AWG 1.5 and 2.0).
                     </p>
                 </div>
 
@@ -390,6 +400,18 @@
                     value="0"
                 >
 
+
+                <div id="awg2SParameters" class="conditional-section hidden">
+                    <label for="s3">S3 (AWG 2.0)</label>
+                    <input type="number" id="s3" min="0" max="65535" value="0">
+
+                    <label for="s4">S4 (AWG 2.0)</label>
+                    <input type="number" id="s4" min="0" max="65535" value="0">
+                </div>
+
+                <p class="help">
+                    H1-H4 accept a single number or a range such as 100-200. Ranges must not overlap.
+                </p>
 
                 <label for="h1">H1</label>
 
