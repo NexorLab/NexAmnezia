@@ -1147,8 +1147,9 @@ async function generateConfig() {
     console.log("Selected Endpoint:", server);
 
 
+    // Prefer the user-supplied key for a custom endpoint; fall back to WARP's key.
     const serverPublicKey =
-        warpPeer.publicKey;
+        getValue("publicKey") || warpPeer.publicKey;
 
 
     /*
