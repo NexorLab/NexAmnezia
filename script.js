@@ -617,6 +617,10 @@ function validateHParameters() {
     for (const id of ["h1", "h2", "h3", "h4"]) {
         const range = parseHRange(getValue(id), id.toUpperCase());
         if (!range) return false;
+        if (awgVersionSelect.value !== "2.0" && range.start !== range.end) {
+            alert("H parameter ranges require AmneziaWG 2.0. Use a single number in AWG 1.5.");
+            return false;
+        }
         ranges.push({ start: range.start, end: range.end, name: id.toUpperCase() });
     }
     for (let i = 0; i < ranges.length; i++) {
